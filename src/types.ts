@@ -46,3 +46,10 @@ export interface DayBlock {
   date: Date;
   items: ScheduleItem[];
 }
+
+
+export interface PlaceSuggestion {
+  name: string;
+  reason: string;
+  stayMinutes: number;
+}

@@ -1,24 +1,19 @@
-import { PropsWithChildren } from "react";
-import ThemeToggle from "./ThemeToggle";
-import ChatBox from "../ChatBox";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import ChatBox from '../ChatBox';
+import ThemeToggle from './ThemeToggle';
 
-function Layout({ children }: PropsWithChildren): JSX.Element {
+const Layout: React.FC = () => {
   return (
-    <div className="relative min-h-screen w-full bg-black text-gray-100">
-      {/* 右上：主題切換 */}
-      <div className="fixed top-4 right-4 z-50">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <main>
+        <Outlet />
+      </main>
+      <ChatBox />
+      <div className="fixed top-4 right-4 z-[9999]"> {/* 使用一個極大的 z-index */}
         <ThemeToggle />
       </div>
-
-      {/* 右下：AI Chat（全站可見） */}
-      <div className="fixed right-4 bottom-4 z-50">
-        <ChatBox />
-      </div>
-
-      {/* 主內容 */}
-      <div className="relative z-10">{children}</div>
     </div>
   );
-}
-
+};
 export default Layout;

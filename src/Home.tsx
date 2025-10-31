@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import { loadTrips } from "./lib/trips";
+import type { TripSerialized } from "./types";
 
 export default function Home() {
   const cards = [
@@ -8,15 +11,17 @@ export default function Home() {
     { title: "我的行程", subtitle: "View and manage your saved trips", path: "/my-trips", icon: "🧳" },
   ];
 
-  let trips: any[] = [];
+  let trips: TripSerialized[] = [];
   try {
-    trips = JSON.parse(localStorage.getItem("my-trips-v1") || "[]");
+    // 確保讀取的是 my-trips-v1
+    trips = loadTrips();
   } catch {
     trips = [];
   }
 
   return (
-    <div className="flex flex-col items-center">
+    // 【已修正】移除最外層 div 的樣式，讓 Layout 元件全權控制
+    <div>
       {/* ===== Hero 區塊 ===== */}
       <section
         className="w-full bg-cover bg-center relative"
@@ -40,7 +45,7 @@ export default function Home() {
       </section>
 
       {/* ===== 功能導覽卡片 ===== */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full max-w-6xl px-6 mt-16">
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full max-w-6xl px-6 mt-16 mx-auto">
         {cards.map((c, idx) => (
           <Link
             key={idx}
@@ -57,7 +62,7 @@ export default function Home() {
       </section>
 
       {/* ===== 最近行程區塊 ===== */}
-      <section className="w-full max-w-6xl px-6 mt-20 mb-24">
+      <section className="w-full max-w-6xl px-6 mt-20 mb-24 mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">🕓 最近建立的行程</h2>
         {trips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

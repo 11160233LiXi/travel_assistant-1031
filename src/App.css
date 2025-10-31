@@ -1,42 +1,26 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Home from "./Home";
+import ItineraryPlanner from "./ItineraryPlanner";
+import Recommend from "./Recommend";
+import Favorites from "./Favorites";
+import MyTrips from "./MyTrips";
+import TripDetail from "./TripDetail";
+import Layout from "./components/Layout"; // 引入新的 Layout 元件
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+export default function App(): JSX.Element {
+  return (
+    <Routes>
+      {/* 所有路由現在都嵌套在 Layout 元件之下，從根本上解決拉桿失效和樣式問題 */}
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="planner" element={<ItineraryPlanner />} />
+        <Route path="recommend" element={<Recommend />} />
+        <Route path="favorites" element={<Favorites />} />
+        <Route path="my-trips" element={<MyTrips />} />
+        <Route path="trips/:id" element={<TripDetail />} />
+        <Route path="*" element={<Home />} />
+      </Route>
+    </Routes>
+  );
 }

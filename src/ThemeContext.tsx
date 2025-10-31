@@ -1,40 +1,49 @@
-import { useEffect, useState } from "react";
+// src/ThemeContext.tsx (最終、最穩定的版本)
 
-type Theme = "light" | "dark";
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-const LS_KEY = "app-theme";
+type Theme = 'light' | 'dark';
 
-function getInitialTheme(): Theme {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw === "light" || raw === "dark") return raw;
-  } catch {}
-  if (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-    return "dark";
-  }
-  return "light";
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
 }
 
-/**
- * 簡易 useTheme hook（不用 Context 也可使用）
- * 回傳：{ theme, setTheme, toggleTheme }
- */
-export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  // 【關鍵修正】簡化起始狀態的邏輯
+  // 1. 優先從 localStorage 讀取。
+  // 2. 如果 localStorage 沒有，就預設為 'light'。
+  // 3. 移除所有對 window.matchMedia 的檢查。
+  const [theme, setTheme] = useState<Theme>(() => {
+    return (localStorage.getItem('theme') as Theme) || 'light';
+  });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(LS_KEY, theme);
-    } catch {}
-    const el = document.documentElement;
-    if (theme === "dark") el.classList.add("dark");
-    else el.classList.remove("dark");
+    const root = window.document.documentElement;
+    
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const setTheme = (t: Theme) => setThemeState(t);
-  const toggleTheme = () => setThemeState((s) => (s === "dark" ? "light" : "dark"));
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
-  return { theme, setTheme, toggleTheme };
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
-export default useTheme;
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
