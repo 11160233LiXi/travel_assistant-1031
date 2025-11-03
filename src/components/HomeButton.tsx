@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function HomeButton(): JSX.Element {
+function HomeButton() {
   return (
     <Link
       to="/"
