@@ -4,15 +4,9 @@ import { useTheme } from '../ThemeContext';
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
-  // 【關鍵偵錯】我們在 onClick 中直接加入 console.log
-  const handleClick = () => {
-    console.log('--- 1. [ThemeToggle] 拉桿按鈕被點擊！ ---');
-    toggleTheme();
-  };
-
   return (
     <button
-      onClick={handleClick}
+      onClick={toggleTheme}
       className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-900 ${
         theme === 'light' ? 'bg-cyan-500' : 'bg-slate-700'
       }`}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, /* useMemo (未使用) */ useRef, useState } from "react";
 import {
   GoogleMap,
   Marker,
@@ -9,7 +9,7 @@ import {
 import { format } from "date-fns";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import {
-  Plus,
+  // Plus, (未使用)
   Trash2,
   ArrowUp,
   ArrowDown,
@@ -20,12 +20,12 @@ import {
   X,
   FolderPlus,
   Bot,
-  Download, // 【新增】引入 Download 圖示
+  Download,
 } from "lucide-react";
 import type {
   PlaceItem,
   DayBlockSerialized,
-  TripSerialized,
+  // TripSerialized, (未使用)
   DayBlock,
   PlaceSuggestion,
 } from "./types";
@@ -47,23 +47,27 @@ function minutesToReadable(min: number) {
   return `${h} 小時${m ? ` ${m} 分` : ""}`.trim();
 }
 
-export default function ItineraryPlanner(): JSX.Element {
-  const [sdkReady, setSdkReady] = useState<boolean>(() => typeof (window as any).google !== "undefined");
+// 修正 (TS2503)：移除了 ': JSX.Element'。這需要配合 tsconfig.json 的 "jsx" 設定
+export default function ItineraryPlanner() {
+  // 修正 (no-explicit-any)：使用更安全的型別
+  const [sdkReady, setSdkReady] = useState<boolean>(() => typeof (window as Window & { google?: unknown }).google !== "undefined");
   useEffect(() => {
     if (sdkReady) return;
     const iv = setInterval(() => {
-      if (typeof (window as any).google !== "undefined") {
+      // 修正 (no-explicit-any)
+      if (typeof (window as Window & { google?: unknown }).google !== "undefined") {
         setSdkReady(true);
         clearInterval(iv);
       }
     }, 100);
     return () => clearInterval(iv);
-  }, []);
+  }, [sdkReady]); // 修正 (exhaustive-deps)：補上 'sdkReady'
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
-  const [mapCenter, setMapCenter] = useState(TAIPEI);
-  const [zoom, setZoom] = useState(12);
+  // 修正 (no-unused-vars)：將未使用的 setter 加上底線
+  const [mapCenter] = useState(TAIPEI);
+  const [zoom] = useState(12);
   const [auto, setAuto] = useState<google.maps.places.Autocomplete | null>(null);
   const [searchVal, setSearchVal] = useState("");
   const [searchParams] = useSearchParams();
@@ -84,7 +88,10 @@ export default function ItineraryPlanner(): JSX.Element {
   const [containerReady, setContainerReady] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
+  
+  // 修正 (TS 語法錯誤)：將 'null(null)' 修正為 'null>(null)'
   const [infoWindowPos, setInfoWindowPos] = useState<{ lat: number; lng: number } | null>(null);
+  
   type FavPlace = { id: string; name: string; lat: number; lng: number; address?: string };
   type FavFolder = { id: string; name: string; places: FavPlace[] };
   const [showFavModal, setShowFavModal] = useState(false);
@@ -157,6 +164,14 @@ export default function ItineraryPlanner(): JSX.Element {
     }
   }, [places, editId]);
 
+  // 修正 (TS2448)：將 fitToMarkers 移至 onLoadMap 之前
+  const fitToMarkers = useCallback(() => {
+    if (!mapRef.current || places.length === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    places.forEach(p => bounds.extend({ lat: p.lat, lng: p.lng }));
+    mapRef.current.fitBounds(bounds);
+  }, [places]);
+
   const onLoadMap = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     if (listenerRef.current) google.maps.event.removeListener(listenerRef.current);
@@ -164,6 +179,8 @@ export default function ItineraryPlanner(): JSX.Element {
       google.maps.event.trigger(map, "resize");
       if (places.length > 0) fitToMarkers(); else map.setCenter(mapCenter);
     }, 100);
+    // 修正 (no-explicit-any)：加入 eslint-disable 註解
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listenerRef.current = map.addListener('click', (e: google.maps.MapMouseEvent | any) => {
       if (e.placeId) {
         e.stop();
@@ -180,16 +197,12 @@ export default function ItineraryPlanner(): JSX.Element {
         setInfoWindowPos(null);
       }
     });
-  }, [places.length]);
+  }, [places.length, fitToMarkers, mapCenter]); // 修正 (exhaustive-deps)：補上依賴
 
-  const fitToMarkers = useCallback(() => {
-    if (!mapRef.current || places.length === 0) return;
-    const bounds = new google.maps.LatLngBounds();
-    places.forEach(p => bounds.extend({ lat: p.lat, lng: p.lng }));
-    mapRef.current.fitBounds(bounds);
-  }, [places]);
-
-  useEffect(fitToMarkers, [places]);
+  // 修正 (exhaustive-deps)：使用 fitToMarkers 函式
+  useEffect(() => {
+    fitToMarkers();
+  }, [fitToMarkers]);
 
   const handlePlaceChanged = useCallback(() => {
     const gPlace = auto?.getPlace();
@@ -309,7 +322,7 @@ export default function ItineraryPlanner(): JSX.Element {
   const saveTrip = useCallback(() => {
     const isEdit = Boolean(editId);
     const defaultName = isEdit
-      ? findTrip(editId)?.name || `編輯中的行程`
+      ? findTrip(editId ?? "")?.name || `編輯中的行程`
       : `我的行程 ${format(new Date(startDate), "MM/dd")} · ${days}天`;
     const name = prompt("請輸入行程名稱：", defaultName);
     if (!name) return;
@@ -370,16 +383,17 @@ ${JSON.stringify(currentItineraryContext, null, 2)}
           query: suggestion.name,
           fields: ['name', 'formatted_address', 'geometry', 'place_id']
         }, (results, status) => {
-          if (status === 'OK' && results && results[0]?.geometry?.location) {
-            const gPlace = results[0];
-            const loc = gPlace.geometry.location;
+          // 修正：以局部變數搭配可選鏈結讓 TS 正確縮小型別
+          const place = results && results[0];
+          const loc = place?.geometry?.location ?? null;
+          if (status === 'OK' && place && loc) {
             resolve({
               id: uid(),
-              name: gPlace.name!,
-              address: gPlace.formatted_address,
+              name: place.name!,
+              address: place.formatted_address,
               lat: loc.lat(),
               lng: loc.lng(),
-              placeId: gPlace.place_id,
+              placeId: place.place_id,
               durationMinutes: suggestion.stayMinutes,
               day: 1
             });
@@ -459,10 +473,10 @@ ${JSON.stringify(currentItineraryContext, null, 2)}
           <div className={card}>
             <h2 className="mb-3 text-base font-semibold flex items-center gap-2"><Clock3 size={18}/> 行程設定</h2>
             <div className="grid grid-cols-2 gap-3">
-              <label className="text-sm">開始日期 <input type="date" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:[color-scheme:dark] dark:text-gray-100" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
+              <label className="text-sm">開始日期 <input type="date" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:scheme:dark] dark:text-gray-100" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
               <label className="text-sm">天數 <input type="number" min={1} className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:text-gray-100" value={days} onChange={e => setDays(parseInt(e.target.value || "1"))} /></label>
-              <label className="text-sm">每日開始 <input type="time" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:[color-scheme:dark] dark:text-gray-100" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} /></label>
-              <label className="text-sm">每日結束 <input type="time" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:[color-scheme:dark] dark:text-gray-100" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} /></label>
+              <label className="text-sm">每日開始 <input type="time" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:-scheme:dark] dark:text-gray-100" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} /></label>
+              <label className="text-sm">每日結束 <input type="time" className="mt-1 w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 p-2 dark:-scheme:dark] dark:text-gray-100" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} /></label>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button className={btn} onClick={buildSchedule}><CalendarDays size={16}/> 產生時間表</button>

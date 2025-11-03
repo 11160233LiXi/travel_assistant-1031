@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
 import { loadTrips } from "./lib/trips";
 import type { TripSerialized } from "./types";
 

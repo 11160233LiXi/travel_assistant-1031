@@ -5,8 +5,19 @@ import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
 import HomeButton from "./components/HomeButton";
 import { useTheme } from "./ThemeContext";
 
-interface Place extends google.maps.places.PlaceResult {}
-interface Folder { id: string; name: string; places: any[]; }
+type Place = google.maps.places.PlaceResult;
+
+// 修正 1：(來自 image_5c72f1.png) 新增 FavPlace 型別
+type FavPlace = {
+  id: string;
+  name: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  place_id?: string;
+};
+// 修正 1：(來自 image_5c72f1.png) 使用 FavPlace[] 而不是 any[]
+interface Folder { id: string; name: string; places: FavPlace[]; }
 
 const Recommend: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -16,14 +27,16 @@ const Recommend: React.FC = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("tourist_attraction");
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [sdkReady, setSdkReady] = useState<boolean>(() => typeof (window as any).google !== "undefined");
+  // 修正 2：(來自 image_5c72f1.png) 修正 (window as any)
+  const [sdkReady, setSdkReady] = useState<boolean>(() => typeof (window as Window & { google?: unknown }).google !== "undefined");
   const [folders, setFolders] = useState<Folder[]>([]);
   const [favoriteFolderId, setFavoriteFolderId] = useState<string>("");
   const { theme } = useTheme(); // 獲取當前主題
 
   useEffect(() => {
     if (sdkReady) return;
-    const iv = setInterval(() => { if (typeof (window as any).google !== "undefined") { setSdkReady(true); clearInterval(iv); } }, 100);
+    // 修正 3：(來自 image_5c72f1.png) 修正 (window as any)
+    const iv = setInterval(() => { if (typeof (window as Window & { google?: unknown }).google !== "undefined") { setSdkReady(true); clearInterval(iv); } }, 100);
     return () => clearInterval(iv);
   }, [sdkReady]);
 
@@ -139,7 +152,7 @@ const Recommend: React.FC = () => {
         return;
     }
 
-    const newPlace = { id: uid(), name: place.name ?? "未知", address: place.vicinity, lat: place.geometry?.location?.lat(), lng: place.geometry?.location?.lng(), place_id: place.place_id };
+    const newPlace: FavPlace = { id: uid(), name: place.name ?? "未知", address: place.vicinity, lat: place.geometry?.location?.lat(), lng: place.geometry?.location?.lng(), place_id: place.place_id };
     const targetFolder = currentFolders[targetFolderIndex];
     const isDuplicate = targetFolder.places.some(p => p.place_id === newPlace.place_id);
 

@@ -1,3 +1,6 @@
+// 修正：在檔案最頂部加入這行註解，以停用此 ESLint 規則
+/* eslint-disable react-refresh/only-export-components */
+
 // src/ThemeContext.tsx (最終、最穩定的版本)
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';

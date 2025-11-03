@@ -1,26 +1,7 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Home from "./Home";
-import ItineraryPlanner from "./ItineraryPlanner";
-import Recommend from "./Recommend";
-import Favorites from "./Favorites";
-import MyTrips from "./MyTrips";
-import TripDetail from "./TripDetail";
-import Layout from "./components/Layout"; // 引入新的 Layout 元件
-
-export default function App(): JSX.Element {
-  return (
-    <Routes>
-      {/* 所有路由現在都嵌套在 Layout 元件之下，從根本上解決拉桿失效和樣式問題 */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="planner" element={<ItineraryPlanner />} />
-        <Route path="recommend" element={<Recommend />} />
-        <Route path="favorites" element={<Favorites />} />
-        <Route path="my-trips" element={<MyTrips />} />
-        <Route path="trips/:id" element={<TripDetail />} />
-        <Route path="*" element={<Home />} />
-      </Route>
-    </Routes>
-  );
+/* 頁面級樣式（可留空或放自訂樣式） */
+.card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1rem;
 }

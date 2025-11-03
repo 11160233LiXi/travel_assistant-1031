@@ -141,7 +141,21 @@ ${itineraryJSON}
             {msgs.map((m, i) => (
               <div key={i} className={ m.role === "user" ? "ml-auto max-w-[85%] rounded-xl bg-emerald-100 dark:bg-emerald-900 px-3 py-2 text-sm text-emerald-900 dark:text-emerald-100" : "mr-auto max-w-[85%] rounded-xl bg-gray-100 dark:bg-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-100" }>
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ node, ...props }) => ( <a {...props} target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 underline" /> ), }}>{m.text}</ReactMarkdown>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({ node, ...props }) => (
+                        <a
+                          {...(props as any)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-600 dark:text-emerald-400 underline"
+                        />
+                      ),
+                    }}
+                  >
+                    {m.text}
+                  </ReactMarkdown>
                 </div>
               </div>
             ))}

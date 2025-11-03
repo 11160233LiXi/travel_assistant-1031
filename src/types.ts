@@ -6,6 +6,8 @@ export interface PlaceItem {
   lng: number;
   placeId?: string;
   durationMinutes: number;
+  day?: number; // 新增 day 屬性（使用者選擇第幾天）
+
 }
 
 export interface DayItemSerialized {

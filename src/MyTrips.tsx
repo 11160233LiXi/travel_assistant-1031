@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { JSX, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { TripSerialized } from "./types";
 import { loadTrips, saveTrips } from "./lib/trips";
@@ -56,7 +56,7 @@ export default function MyTrips(): JSX.Element {
                   {t.days} 天 · {t.startDate} · 建立於 {format(new Date(t.createdAt), 'yyyy/MM/dd')}
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 shrink-0">
                 <Link to={`/trips/${t.id}`} className="px-3 py-1 text-sm bg-slate-200 dark:bg-gray-600 hover:bg-slate-300 dark:hover:bg-gray-500 rounded-md text-gray-800 dark:text-gray-200 transition">查看</Link>
                 <Link to={`/planner?editId=${t.id}`} className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">編輯</Link>
                 <button onClick={() => deleteTrip(t.id)} className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md transition">刪除</button>
