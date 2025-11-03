@@ -1,6 +1,6 @@
 // src/App.tsx (最終修正版)
 
-import React from "react";
+
 import { Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import ItineraryPlanner from "./ItineraryPlanner";
@@ -11,7 +11,7 @@ import TripDetail from "./TripDetail";
 import ChatBox from "./ChatBox";
 import ThemeToggle from "./components/ThemeToggle";
 
-export default function App(): JSX.Element {
+export default function App(){
   return (
     <div className="relative">
       <Routes>
