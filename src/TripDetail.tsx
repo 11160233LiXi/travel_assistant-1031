@@ -7,7 +7,7 @@ import type { TripSerialized } from "./types";
 import { loadTrips } from "./lib/trips";
 import HomeButton from "./components/HomeButton";
 
-export default function TripDetail(): JSX.Element {
+export default function TripDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
